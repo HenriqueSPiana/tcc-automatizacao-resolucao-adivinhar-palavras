@@ -1,2 +1,1 @@
-cbow_s300.txt filter=lfs diff=lfs merge=lfs -text
 modelos/cbow_s300.zip filter=lfs diff=lfs merge=lfs -text
