@@ -2,12 +2,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
-
 import time
-
-
-
-
+from logica_w2v import obter_palavra_aleatoria
 
 
 def escrevePalavra(elemento,palavra):
@@ -18,13 +14,9 @@ def enviarPalavra(driver):
     actions = ActionChains(driver)
     actions.send_keys(Keys.RETURN).perform()
 
-
-    
-
-
 def main():
 
-    primeiraPalavra="casa"
+    primeiraPalavra=obter_palavra_aleatoria()
     navegador = webdriver.Chrome()
     navegador.get("https://contexto.me")
     time.sleep(5)
