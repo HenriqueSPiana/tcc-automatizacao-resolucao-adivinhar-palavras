@@ -5,25 +5,25 @@ import time
 from logica_w2v import obter_palavra_aleatoria
 
 
-def escrevePalavra(elemento,palavra):
+def escreve_palavra(elemento,palavra):
         elemento.clear()
         elemento.send_keys(palavra)
 
-def enviarPalavra(driver):
+def enviar_palavra(driver):
     actions = ActionChains(driver)
     actions.send_keys(Keys.RETURN).perform()
 
 def main():
 
-    primeiraPalavra=obter_palavra_aleatoria()
+    primeira_palavra=obter_palavra_aleatoria()
     navegador = webdriver.Chrome()
     navegador.get("https://contexto.me")
     time.sleep(5)
-    input = navegador.find_element("class name", "word")
+    _input = navegador.find_element("class name", "word")
 
-    escrevePalavra(input,primeiraPalavra)
+    escreve_palavra(_input,primeira_palavra)
     time.sleep(3)
-    enviarPalavra(navegador)
+    enviar_palavra(navegador)
     time.sleep(3)
 
 
