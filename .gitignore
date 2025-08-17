@@ -1,1 +1,5 @@
 cbow_s300.txt
+LICENSE
+venv/   
+__pycache__/
+*.py[cod]
