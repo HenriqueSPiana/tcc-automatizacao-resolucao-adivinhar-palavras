@@ -5,7 +5,6 @@ import nltk
 
 NOME_ARQUIVO_MODELO = 'cbow_s300.txt' 
 modelo_carregado = None
-vocabulario_filtrado = None
 
 def carregar_modelo():
 
@@ -36,18 +35,21 @@ def baixa_dicionario():
 
 
 def obter_palavra_aleatoria():
+    baixa_dicionario()
     tags_validas = ('N', 'V', 'ADJ')
-    palavra_aleatoria = []
+    palavras_validas = []
     # 'N', 'V', 'ADJ' significam substantivo, verbo e adjetivo, respectivamente.
 
     dicionario = nltk.corpus.mac_morpho.tagged_words()
 
     for palavra, tag in dicionario:
-        # Se a tag começa com uma das válidas
-        if tag.startswith(tags_validas):
-            palavra_aleatoria.append(palavra)
+        # Se a tag começa com uma das válidas e se ela é uma palavra válida, o isalpha elimina caracteres especiais e numeros, 
+        # deixando somente palavras sem hifen e sem espaços
+        if tag.startswith(tags_validas) and palavra.isalpha():
+            palavras_validas.append(palavra)
 
-    return random.choice(palavra_aleatoria).lower()
+    palavra_aleatoria = random.choice(palavras_validas).lower()
+    return palavra_aleatoria
 
 if __name__ == '__main__':
     print("Testando a função de obter palavra aleatória...")

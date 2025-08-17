@@ -19,9 +19,9 @@ def main():
     navegador = webdriver.Chrome()
     navegador.get("https://contexto.me")
     time.sleep(5)
-    _input = navegador.find_element("class name", "word")
+    entrada = navegador.find_element("class name", "word")
 
-    escreve_palavra(_input,primeira_palavra)
+    escreve_palavra(entrada,primeira_palavra)
     time.sleep(3)
     enviar_palavra(navegador)
     time.sleep(3)
