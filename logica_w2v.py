@@ -26,20 +26,28 @@ def carregar_modelo():
         
     return modelo_carregado
 
-def obter_palavra_aleatoria():
-    try:
-        nltk.data.find('corpora/mac_morpho')
-    except LookupError:
-        print("Corpus 'mac_morpho' não encontrado")
+
+def baixa_dicionario():
+   if not nltk.data.find('corpora/mac_morpho'):
+        print("Corpus 'mac_morpho' não encontrado, baixando...")
         nltk.download('mac_morpho')
-        print("Download concluído. ")
+        print("Corpus 'mac_morpho' baixado com sucesso.")  
 
-    dicionario = nltk.corpus.mac_morpho.words()
-    palavra_aleatoria = random.choice(dicionario)
-    while len(palavra_aleatoria) < 5:
-        palavra_aleatoria = random.choice(dicionario)
 
-    return palavra_aleatoria.lower()
+
+def obter_palavra_aleatoria():
+    tags_validas = ('N', 'V', 'ADJ')
+    palavra_aleatoria = []
+    # 'N', 'V', 'ADJ' significam substantivo, verbo e adjetivo, respectivamente.
+
+    dicionario = nltk.corpus.mac_morpho.tagged_words()
+
+    for palavra, tag in dicionario:
+        # Se a tag começa com uma das válidas
+        if tag.startswith(tags_validas):
+            palavra_aleatoria.append(palavra)
+
+    return random.choice(palavra_aleatoria).lower()
 
 if __name__ == '__main__':
     print("Testando a função de obter palavra aleatória...")
