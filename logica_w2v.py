@@ -2,9 +2,17 @@ import gensim
 import random
 import os
 import nltk
+import zipfile
 
 NOME_ARQUIVO_MODELO = 'cbow_s300.txt' 
 modelo_carregado = None
+
+
+
+def descompactar_arquivo(zip_path, extrair_para):
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        zip_ref.extractall(extrair_para)
+
 
 def carregar_modelo():
 
@@ -12,10 +20,8 @@ def carregar_modelo():
 
     if modelo_carregado is None:
         if not os.path.exists(NOME_ARQUIVO_MODELO):
-            raise FileNotFoundError(
-                f"Arquivo do modelo '{NOME_ARQUIVO_MODELO}' não encontrado. "
-            )
-        
+            descompactar_arquivo('cbow_s300.zip', './modelos')
+
         print("Carregando modelo")
         modelo_carregado = gensim.models.KeyedVectors.load_word2vec_format(
             NOME_ARQUIVO_MODELO, 
@@ -51,8 +57,23 @@ def obter_palavra_aleatoria():
     palavra_aleatoria = random.choice(palavras_validas).lower()
     return palavra_aleatoria
 
+
+def obter_palavra_similar(palavra):
+    carregar_modelo()
+    return modelo_carregado.most_similar(positive=palavra, topn=1)
+
+
+
+    
+    
+    
+
+
+
 if __name__ == '__main__':
     print("Testando a função de obter palavra aleatória...")
 
-    for i in range(5):
-        print(f"\nA palavra aleatória escolhida é: '{obter_palavra_aleatoria()}'")
+
+    obter_palavra_similar("teste")
+    # for i in range(5):
+    #     print(f"\nA palavra aleatória escolhida é: '{obter_palavra_aleatoria()}'")

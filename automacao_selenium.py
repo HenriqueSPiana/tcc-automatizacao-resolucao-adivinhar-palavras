@@ -11,18 +11,18 @@ navegador = webdriver.Chrome()
 def escreve_palavra(elemento,palavra):
     elemento.clear()
     elemento.send_keys(palavra)
-    time.sleep(3)
+    time.sleep(1)
 
 
 def enviar_palavra(driver):
     actions = ActionChains(driver)
     actions.send_keys(Keys.RETURN).perform()
-    time.sleep(3)
+    time.sleep(1)
 
 
 def acessa_contexto(navegador):
     navegador.get("https://contexto.me")
-    time.sleep(3)
+    time.sleep(1)
 
 
 def pega_adesao(navegador):
@@ -47,5 +47,5 @@ if __name__ == '__main__':
     escreve_palavra(entrada, "teste")
     enviar_palavra(navegador)
     print(pega_adesao(navegador))
-    calcula_adesao(obter_palavra_aleatoria,navegador,entrada)    
+    calcula_adesao(obter_palavra_aleatoria,navegador,entrada) 
 

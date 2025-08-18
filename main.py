@@ -1,5 +1,5 @@
-from logica_w2v import obter_palavra_aleatoria
-from automacao_selenium import escreve_palavra, enviar_palavra, acessa_contexto,navegador
+from logica_w2v import obter_palavra_aleatoria,obter_palavra_similar
+from automacao_selenium import *
 global primeira_palavra
 
 
@@ -11,7 +11,9 @@ def main():
     entrada = navegador.find_element("class name", "word")
     escreve_palavra(entrada,primeira_palavra)
     enviar_palavra(navegador)
-    
+    print(pega_adesao(navegador))
+    calcula_adesao(obter_palavra_aleatoria,navegador,entrada)
+    print(obter_palavra_similar(primeira_palavra))
 
 
 if __name__ == "__main__":
