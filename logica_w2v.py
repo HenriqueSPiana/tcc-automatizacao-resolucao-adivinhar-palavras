@@ -4,10 +4,13 @@ import os
 import nltk
 from pathlib import Path
 import zipfile
+from collections import deque
 
 NOME_ARQUIVO_MODELO = './modelos/cbow_s300.txt' 
 modelo_carregado = None
 
+global pilha
+pilha = deque();
 
 
 def descompactar_arquivo():
@@ -35,6 +38,20 @@ def carregar_modelo():
     return modelo_carregado
 
 
+def adiciona_na_pilha(palavra):
+    pilha.append(palavra)
+    return pilha
+
+def pega_palavra_pilha():
+    if pilha:
+        return pilha.pop()
+    return None
+
+def limpa_pilha():
+    pilha.clear()
+    return pilha
+
+
 def baixa_dicionario():
    if not nltk.data.find('corpora/mac_morpho'):
         print("Corpus 'mac_morpho' não encontrado, baixando...")
@@ -58,11 +75,13 @@ def obter_palavra_aleatoria():
             palavras_validas.append(palavra)
 
     palavra_aleatoria = random.choice(palavras_validas).lower()
-    return palavra_aleatoria
+    adiciona_na_pilha(palavra_aleatoria)
 
 
 def obter_palavra_similar(palavra):
-    return modelo_carregado.most_similar(negative=palavra, topn=1)
+    palavrasimilar =  modelo_carregado.most_similar(positive=palavra, topn=1)
+    adiciona_na_pilha(palavrasimilar)
+
 
 
 
@@ -77,8 +96,8 @@ if __name__ == '__main__':
 
     carregar_modelo()
     print(obter_palavra_similar("teste"))
-    print(obter_palavra_similar("teste"))
-    print(obter_palavra_similar("teste"))
+
+
 
     # for i in range(5):
     #     print(f"\nA palavra aleatória escolhida é: '{obter_palavra_aleatoria()}'")
