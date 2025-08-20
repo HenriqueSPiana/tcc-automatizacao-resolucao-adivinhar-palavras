@@ -25,27 +25,27 @@ def acessa_contexto(navegador):
     time.sleep(1)
 
 
-def pega_adesao(navegador):
+def pega_aderencia(navegador):
     css_selector = "div.row span:nth-child(2)"
     second_span = navegador.find_element(By.CSS_SELECTOR, css_selector)
     return int(second_span.text)
 
 
-def calcula_adesao(metodo,navegador,entrada):
-    adesao = pega_adesao(navegador)
-    if (adesao>=3000):
+def calcula_aderencia(metodo,navegador,entrada):
+    aderencia = pega_aderencia(navegador)
+    if (aderencia>=3000):
         escreve_palavra(entrada, metodo())
         enviar_palavra(navegador)
-        print(pega_adesao(navegador))
-        calcula_adesao(metodo,navegador,entrada);
+        print(pega_aderencia(navegador))
+        calcula_aderencia(metodo,navegador,entrada);
     else:
-        print("Adesão abaixo de 3000, encerrando.")
+        print("Aderência abaixo de 3000, encerrando.")
 
 if __name__ == '__main__':
     acessa_contexto(navegador)
     entrada = navegador.find_element("class name", "word")
     escreve_palavra(entrada, "teste")
     enviar_palavra(navegador)
-    print(pega_adesao(navegador))
-    calcula_adesao(obter_palavra_aleatoria,navegador,entrada) 
+    print(pega_aderencia(navegador))
+    calcula_aderencia(obter_palavra_aleatoria,navegador,entrada)
 
