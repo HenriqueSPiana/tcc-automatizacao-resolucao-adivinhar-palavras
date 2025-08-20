@@ -2,17 +2,20 @@ import gensim
 import random
 import os
 import nltk
+from pathlib import Path
 import zipfile
 
-NOME_ARQUIVO_MODELO = 'cbow_s300.txt' 
+NOME_ARQUIVO_MODELO = './modelos/cbow_s300.txt' 
 modelo_carregado = None
 
 
 
-def descompactar_arquivo(zip_path, extrair_para):
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        zip_ref.extractall(extrair_para)
+def descompactar_arquivo():
+    base_dir = Path(__file__).resolve().parent
+    caminho = base_dir / "modelos" / "cbow_s300.zip"
 
+    with zipfile.ZipFile(caminho, 'r') as zip_ref:
+        zip_ref.extractall(base_dir / "modelos")
 
 def carregar_modelo():
 
@@ -20,7 +23,7 @@ def carregar_modelo():
 
     if modelo_carregado is None:
         if not os.path.exists(NOME_ARQUIVO_MODELO):
-            descompactar_arquivo('cbow_s300.zip', './modelos')
+            descompactar_arquivo()
 
         print("Carregando modelo")
         modelo_carregado = gensim.models.KeyedVectors.load_word2vec_format(
