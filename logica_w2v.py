@@ -62,7 +62,6 @@ def obter_palavra_aleatoria():
 
 
 def obter_palavra_similar(palavra):
-    carregar_modelo()
     return modelo_carregado.most_similar(positive=palavra, topn=1)
 
 

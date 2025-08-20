@@ -48,4 +48,4 @@ if __name__ == '__main__':
     enviar_palavra(navegador)
     print(pega_aderencia(navegador))
     calcula_aderencia(obter_palavra_aleatoria,navegador,entrada)
-
+    

@@ -1,9 +1,10 @@
-from logica_w2v import obter_palavra_aleatoria,obter_palavra_similar
+from logica_w2v import obter_palavra_aleatoria,obter_palavra_similar,carregar_modelo
 from automacao_selenium import *
 global primeira_palavra
 
 
 def main():
+    carregar_modelo()
     global primeira_palavra
     primeira_palavra=obter_palavra_aleatoria()
     acessa_contexto(navegador)
