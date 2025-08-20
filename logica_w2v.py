@@ -62,7 +62,7 @@ def obter_palavra_aleatoria():
 
 
 def obter_palavra_similar(palavra):
-    return modelo_carregado.most_similar(positive=palavra, topn=1)
+    return modelo_carregado.most_similar(negative=palavra, topn=1)
 
 
 
@@ -75,7 +75,10 @@ def obter_palavra_similar(palavra):
 if __name__ == '__main__':
     print("Testando a função de obter palavra aleatória...")
 
+    carregar_modelo()
+    print(obter_palavra_similar("teste"))
+    print(obter_palavra_similar("teste"))
+    print(obter_palavra_similar("teste"))
 
-    obter_palavra_similar("teste")
     # for i in range(5):
     #     print(f"\nA palavra aleatória escolhida é: '{obter_palavra_aleatoria()}'")
