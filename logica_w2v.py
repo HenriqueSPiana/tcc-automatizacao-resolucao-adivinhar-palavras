@@ -80,6 +80,7 @@ def obter_palavra_aleatoria():
 
 def obter_palavra_similar(palavra):
     palavrasimilar =  modelo_carregado.most_similar(positive=palavra, topn=1)
+    print("Palavra Similar:", palavrasimilar)
     adiciona_na_pilha(palavrasimilar)
 
 

@@ -21,27 +21,39 @@ def enviar_palavra(driver):
     print("Enviando a palavra...")
     actions = ActionChains(driver)
     actions.send_keys(Keys.RETURN).perform()
-    time.sleep(1)
+    time.sleep(3)
 
-def isPalavra():
+def isPalavra(navegador):
     print("Validando a palavra...")
     try:
-        WebDriverWait(navegador, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "message-text"))
-        )
+        time.sleep(1)
+        mensagem_elemento = navegador.find_element(By.CLASS_NAME, "message-text")
+        print(mensagem_elemento.text)
+        mensagem_esperada = "Perdão, não conheço essa palavra"
+
+        if(mensagem_esperada == mensagem_elemento.text):
+            return False
         return True
     except Exception as e:
         print(f"Erro ao validar a palavra: {e}")
-        return False
+        return True
+
+def limpa_campo(navegador):
+    print("Limpando o campo...")
+    campo_elemento = navegador.find_element(By.CLASS_NAME, "word")
+    campo_elemento.clear()
+    time.sleep(1);
 
 
-def valida_palavra():
+def valida_palavra(navegador):
     print("Validando a palavra...")
-    if not isPalavra():
-        obter_palavra_aleatoria()
-        valida_palavra()
+    if not isPalavra(navegador):
+        print("Palavra invalida.")
+        limpa_campo(navegador)
+        return False
     else:
         print("Palavra válida.")
+        return True
 
 def acessa_site(navegador):
     print("Acessando o site...")
@@ -56,22 +68,11 @@ def pega_aderencia(navegador):
     return int(second_span.text)
 
 
-def calcula_aderencia(metodo,navegador,entrada):
-    aderencia = pega_aderencia(navegador)
-    print(f"Aderência: {aderencia}")
-    if (aderencia>=3000):
-        print("Aderência muito alta pegando outra palavra")
-        escreve_palavra(entrada, metodo())
-        enviar_palavra(navegador)
-        print(pega_aderencia(navegador))
-        calcula_aderencia(metodo,navegador,entrada);
-    print("Aderência abaixo de 3000")
-
 if __name__ == '__main__':
     acessa_site(navegador)
     entrada = navegador.find_element("class name", "word")
-    escreve_palavra(entrada, "teste")
+    escreve_palavra(entrada, "teshadste")
     enviar_palavra(navegador)
-    print(pega_aderencia(navegador))
-    calcula_aderencia(obter_palavra_aleatoria,navegador,entrada)
+    # print(pega_aderencia(navegador))
+    # calcula_aderencia(obter_palavra_aleatoria,navegador,entrada)
     
