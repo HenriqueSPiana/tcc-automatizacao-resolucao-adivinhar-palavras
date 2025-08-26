@@ -4,7 +4,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from logica_w2v import obter_palavra_aleatoria;
+from logica_w2v import adiciona_na_pilha;
 import time
 global navegador
 navegador = webdriver.Chrome()
@@ -51,9 +51,9 @@ def valida_palavra(navegador):
         print("Palavra invalida.")
         limpa_campo(navegador)
         return False
-    else:
-        print("Palavra válida.")
-        return True
+    
+    print("Palavra válida.")
+    return True
 
 def acessa_site(navegador):
     print("Acessando o site...")
@@ -61,18 +61,17 @@ def acessa_site(navegador):
     time.sleep(1)
 
 
-def pega_aderencia(navegador):
-    print("Pegando a aderência...")
-    css_selector = "div.row span:nth-child(2)"
-    second_span = navegador.find_element(By.CSS_SELECTOR, css_selector)
-    return int(second_span.text)
+def pega_palavra_navegador(navegador):
+    print("Pegando a palavra...")
+    css_selector = "div.row span:nth-child(1)"
+    first_span = navegador.find_element(By.CSS_SELECTOR, css_selector)
+    adiciona_na_pilha(str(first_span.text))
 
 
 if __name__ == '__main__':
     acessa_site(navegador)
     entrada = navegador.find_element("class name", "word")
-    escreve_palavra(entrada, "teshadste")
+    escreve_palavra(entrada, "teste")
     enviar_palavra(navegador)
-    # print(pega_aderencia(navegador))
-    # calcula_aderencia(obter_palavra_aleatoria,navegador,entrada)
+    print(pega_palavra_navegador(navegador))
     
