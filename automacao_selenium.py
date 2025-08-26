@@ -24,7 +24,7 @@ def enviar_palavra(driver):
     time.sleep(3)
 
 def isPalavra(navegador):
-    print("Validando a palavra...")
+    print("executando metodo isPalavra")
     try:
         time.sleep(1)
         mensagem_elemento = navegador.find_element(By.CLASS_NAME, "message-text")
