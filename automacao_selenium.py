@@ -17,9 +17,14 @@ def escreve_palavra(elemento,palavra):
     time.sleep(1)
 
 
-def enviar_palavra(driver):
+def insere_palavra_e_envia(elemento, palavra):
+    escreve_palavra(elemento, palavra)
+    enviar_palavra()
+
+
+def enviar_palavra():
     print("Enviando a palavra...")
-    actions = ActionChains(driver)
+    actions = ActionChains(navegador)
     actions.send_keys(Keys.RETURN).perform()
     time.sleep(3)
 
@@ -29,9 +34,9 @@ def isPalavra(navegador):
         time.sleep(1)
         mensagem_elemento = navegador.find_element(By.CLASS_NAME, "message-text")
         print(mensagem_elemento.text)
-        mensagem_esperada = "Perdão, não conheço essa palavra"
+        mensagem_esperada = ["Perdão, não conheço essa palavra","Essa palavra não vale porque é muito comum"]
 
-        if(mensagem_esperada == mensagem_elemento.text):
+        if(mensagem_esperada[0] == mensagem_elemento.text or mensagem_esperada[1] == mensagem_elemento.text):
             return False
         return True
     except Exception as e:
