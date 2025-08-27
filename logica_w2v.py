@@ -79,9 +79,16 @@ def obter_palavra_aleatoria():
 
 
 def obter_palavra_similar(palavra):
-    palavrasimilar =  modelo_carregado.most_similar(positive=palavra, topn=1)
-    print("Palavra Similar:", palavrasimilar[0][0])
-    adiciona_na_pilha(palavrasimilar[0][0])
+    palavrasimilar =  modelo_carregado.most_similar(positive=palavra, topn=5)
+    print("Palavras Similares:", [p[0] for p in palavrasimilar])
+    for p in palavrasimilar:
+        if IsPalavra(p[0]):
+            adiciona_na_pilha(p[0])
+
+
+
+def IsPalavra(palavra):
+    return palavra.isalpha() and len(palavra) > 2
 
 
 

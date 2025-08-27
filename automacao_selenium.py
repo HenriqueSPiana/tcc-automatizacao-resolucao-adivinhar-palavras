@@ -28,8 +28,8 @@ def enviar_palavra():
     actions.send_keys(Keys.RETURN).perform()
     time.sleep(3)
 
-def isPalavra(navegador):
-    print("executando metodo isPalavra")
+def validaInsercao():
+    print("executando metodo validaInsercao")
     try:
         time.sleep(1)
         mensagem_elemento = navegador.find_element(By.CLASS_NAME, "message-text")
@@ -43,30 +43,20 @@ def isPalavra(navegador):
         print(f"Erro ao validar a palavra: {e}")
         return True
 
-def limpa_campo(navegador):
+def limpa_campo():
     print("Limpando o campo...")
     campo_elemento = navegador.find_element(By.CLASS_NAME, "word")
     campo_elemento.clear()
     time.sleep(1);
 
 
-def valida_palavra(navegador):
-    print("Validando a palavra...")
-    if not isPalavra(navegador):
-        print("Palavra invalida.")
-        limpa_campo(navegador)
-        return False
-    
-    print("Palavra válida.")
-    return True
-
-def acessa_site(navegador):
+def acessa_site():
     print("Acessando o site...")
     navegador.get("https://contexto.me")
     time.sleep(1)
 
 
-def pega_palavra_navegador(navegador):
+def pega_palavra_navegador():
     print("Pegando a palavra...")
     css_selector = "div.row span:nth-child(1)"
     first_span = navegador.find_element(By.CSS_SELECTOR, css_selector)

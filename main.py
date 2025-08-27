@@ -7,16 +7,20 @@ def main():
     #proxima vez que for testar, lembrar que é necessario ter conexão com a web
     obter_palavra_aleatoria()
 #    adiciona_na_pilha('teshadste')
-    acessa_site(navegador)
+    acessa_site()
     campo_entrada = navegador.find_element("class name", "word")
     insere_palavra_e_envia(campo_entrada,pega_palavra_pilha());
-    while not(valida_palavra(navegador)):
+    while not(validaInsercao()):
+        limpa_campo()
         obter_palavra_aleatoria()
         insere_palavra_e_envia(campo_entrada,pega_palavra_pilha());
     carregar_modelo()
-    pega_palavra_navegador(navegador)
+    pega_palavra_navegador()
     obter_palavra_similar(pega_palavra_pilha())
     insere_palavra_e_envia(campo_entrada,pega_palavra_pilha())
+    while not (()):
+        insere_palavra_e_envia(campo_entrada,pega_palavra_pilha());
+        
 
 
 
