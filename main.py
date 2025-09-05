@@ -1,4 +1,4 @@
-from logica_w2v import obter_palavra_aleatoria,obter_palavra_similar,carregar_modelo,pega_palavra_pilha,adiciona_na_pilha
+from logica_w2v import limpa_pilha, obter_palavra_aleatoria,obter_palavra_similar,carregar_modelo,pega_palavra_pilha,adiciona_na_pilha
 from automacao_selenium import *
 
 
@@ -18,9 +18,14 @@ def main():
     pega_palavra_navegador()
     obter_palavra_similar(pega_palavra_pilha())
     insere_palavra_e_envia(campo_entrada,pega_palavra_pilha())
-    while not (()):
+    while not (validaInsercao()):
+        limpa_campo()
         insere_palavra_e_envia(campo_entrada,pega_palavra_pilha());
-        
+        limpa_pilha();
+        pega_palavra_navegador()
+        obter_palavra_similar(pega_palavra_pilha())
+        insere_palavra_e_envia(campo_entrada,pega_palavra_pilha())
+
 
 
 

@@ -5,7 +5,7 @@ import nltk
 from pathlib import Path
 import zipfile
 from collections import deque
-
+import numpy as np;
 NOME_ARQUIVO_MODELO = './modelos/cbow_s300.txt' 
 modelo_carregado = None
 
@@ -85,17 +85,18 @@ def obter_palavra_similar(palavra):
         if IsPalavra(p[0]):
             adiciona_na_pilha(p[0])
 
-
-
 def IsPalavra(palavra):
     return palavra.isalpha() and len(palavra) > 2
 
 
 
+def obterCordenada(palavra):
+    return modelo_carregado[palavra]
 
-    
-    
-    
+def pegaDistanciaEuclidiana(palavra1, palavra2):
+    vetor1 = modelo_carregado[palavra1]
+    vetor2 = modelo_carregado[palavra2]
+    return np.linalg.norm(vetor1 - vetor2)
 
 
 
@@ -103,9 +104,8 @@ if __name__ == '__main__':
     print("Testando a função de obter palavra aleatória...")
 
     carregar_modelo()
-    print(obter_palavra_similar("teste"))
-
-
+    print(obterCordenada("teste"))
+    print(pegaDistanciaEuclidiana("teste", "exemplo"))
 
     # for i in range(5):
     #     print(f"\nA palavra aleatória escolhida é: '{obter_palavra_aleatoria()}'")
