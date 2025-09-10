@@ -12,6 +12,7 @@ try:
     STOP_PT: Set[str] = set(stopwords.words("portuguese"))
 except (LookupError, OSError):
     print("Pacote 'stopwords' do NLTK não encontrado. Baixando agora...")
+    # quiet=False para mostrar o progresso do download ao usuário
     nltk.download('stopwords', quiet=False)
     from nltk.corpus import stopwords
     STOP_PT: Set[str] = set(stopwords.words("portuguese"))
@@ -19,11 +20,44 @@ except (LookupError, OSError):
 # --- FIM: Seção de download automático do NLTK ---
 
 
+# --- Seção de carregamento do dicionário pt-BR ---
+def load_dictionary(file_path: str) -> Set[str]:
+    """Carrega palavras de um arquivo de texto para um set, para verificação rápida."""
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            return {line.strip().lower() for line in f}
+    except FileNotFoundError:
+        print("-" * 50)
+        print(f"ERRO: Arquivo de dicionário não encontrado em '{file_path}'")
+        print("Por favor, baixe o arquivo 'dicionario_ptbr.txt' e coloque-o na mesma pasta do script.")
+        print("Link para download: https://raw.githubusercontent.com/python-br/palavras/master/palavras.txt")
+        print("-" * 50)
+        exit()
+
+# Carrega o dicionário pt-BR.
+PTBR_DICTIONARY = load_dictionary("dicionario_ptbr.txt")
+
+
+# --- Função de validação de palavra ATUALIZADA ---
 def is_valid_word(w: str) -> bool:
-    # A variável STOP_PT agora é garantida de existir.
-    return w.isalpha() and w.islower() and (w not in STOP_PT) and (len(w) > 2)
+    """
+    Verifica se a palavra é válida:
+    1. Apenas letras.
+    2. Minúscula.
+    3. Não é uma stopword.
+    4. Tem mais de 2 letras.
+    5. EXISTE NO DICIONÁRIO PT-BR.
+    """
+    return (
+        w.isalpha() and
+        w.islower() and
+        w not in STOP_PT and
+        len(w) > 2 and
+        w in PTBR_DICTIONARY
+    )
 
 class OfflineContextoOracle:
+    # (Esta classe permanece inalterada)
     def __init__(self, model: KeyedVectors, secret: str):
         if secret not in model:
             raise ValueError(f"A palavra secreta '{secret}' não está no vocabulário do modelo.")
@@ -43,6 +77,7 @@ class OfflineContextoOracle:
         return self.rank_map.get(guess, None)
 
 class HybridContextoSolver:
+    # (Esta classe permanece praticamente inalterada, mas agora se beneficia da validação mais forte)
     def __init__(
         self,
         model: KeyedVectors,
@@ -56,8 +91,10 @@ class HybridContextoSolver:
         self.optimization_rank_threshold = optimization_rank_threshold
         self.rng = random.Random(random_state)
 
+        print("Filtrando vocabulário com base no dicionário (pode levar um momento)...")
         base_vocab = model.index_to_key[:max_vocab]
         self.vocab = {w for w in base_vocab if is_valid_word(w)}
+        print(f"Vocabulário filtrado para {len(self.vocab)} palavras válidas.")
 
         default_seeds = ["animal", "objeto", "lugar", "corpo", "natureza", "alimento", "ferramenta", "sentimento"]
         self.seed_words = [w for w in default_seeds if w in self.vocab]
@@ -120,7 +157,7 @@ class HybridContextoSolver:
         if len(self.history) < 5:
             for seed in self.seed_words:
                 if seed not in self.guessed: return seed
-            return self.rng.choice([w for w in list(self.vocab)[:20000] if w not in self.guessed])
+            return self.rng.choice([w for w in list(self.vocab) if w not in self.guessed])
 
         candidates = self._get_candidates_from_history()
         valid_candidates = [c for c in candidates if c not in self.guessed]
@@ -139,7 +176,7 @@ class HybridContextoSolver:
                 if avg_sim > max_sim: max_sim, best_cand = avg_sim, cand
             return best_cand
         
-        return self.rng.choice([w for w in list(self.vocab)[:50000] if w not in self.guessed])
+        return self.rng.choice([w for w in list(self.vocab) if w not in self.guessed])
 
     def solve(self, max_attempts: int = 200, verbose: bool = True) -> List[Tuple[str, int]]:
         for attempt in range(1, max_attempts + 1):
@@ -166,15 +203,13 @@ class HybridContextoSolver:
 
         return self.history
 
-
 # --- Execução ---
 try:
     print("Carregando modelo Word2Vec (pode levar um tempo)...")
     model = KeyedVectors.load_word2vec_format("cbow_s300.txt", binary=False)
     print("Modelo carregado com sucesso.")
 
-    # Defina a palavra secreta para o teste
-    secret = "colcha"
+    secret = "felicidade" # Mude para testar
 
     oracle = OfflineContextoOracle(model, secret)
     solver = HybridContextoSolver(model, oracle_query=oracle.query_rank) 
