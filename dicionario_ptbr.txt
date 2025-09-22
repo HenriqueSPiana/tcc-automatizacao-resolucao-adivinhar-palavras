@@ -1,6 +1,3 @@
-a
-à
-Aarão
 aba
 abacate
 abacateiro
@@ -35253,12 +35250,10 @@ austeros
 austrais
 austral
 austrália
-Austrália
 australiana
 australianas
 australiano
 australianos
-Áustria
 austríaca
 austríacas
 austríaco
@@ -123638,10 +123633,6 @@ esmalto
 esmaltou
 esmegma
 esmera
-esmerá
-esmerado
-esmerai
-esmerais
 esmeralda
 esmeraldas
 esmeraldina
@@ -137803,7 +137794,6 @@ feitos
 Feitosa
 feitura
 feituras
-feiura
 feixe
 feixes
 feldspato
@@ -166711,7 +166701,6 @@ lápis
 lapiseira
 lapiseiras
 Laplace
-Lapônia
 lapso
 lapsos
 laqueação
@@ -166723,8 +166712,6 @@ laranjadas
 laranjas
 laranjeira
 laranjeiras
-larápia
-larápias
 larápio
 larápios
 lareira
@@ -166798,7 +166785,6 @@ laringite
 laringites
 larva
 larvas
-las
 lãs
 lasanha
 lasca
@@ -175845,9 +175831,7 @@ mercenária
 mercenárias
 mercenário
 mercenários
-MERCOSUL
 mercúrio
-Mércurio
 merda
 merdas
 mereça
@@ -237033,8 +237017,6 @@ soai
 soais
 soalheira
 soalheiras
-soalho
-soalhos
 soam
 soamo
 soamos
@@ -246587,7 +246569,6 @@ terapêutico
 terapêuticos
 terapia
 terapias
-terás
 teratológica
 teratológicas
 teratológico

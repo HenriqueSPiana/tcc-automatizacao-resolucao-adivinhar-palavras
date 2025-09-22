@@ -1,3 +1,4 @@
 cbow_s300.txt
 venv/   
 __pycache__/
+.python-version
