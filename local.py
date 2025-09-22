@@ -34,7 +34,7 @@ def load_dictionary(file_path: str) -> Set[str]:
         print("-" * 50)
         exit()
 
-# Carrega o dicionário pt-BR.
+    # Carrega o dicionário pt-BR.
 PTBR_DICTIONARY = load_dictionary("dicionario_ptbr.txt")
 
 
@@ -57,7 +57,6 @@ def is_valid_word(w: str) -> bool:
     )
 
 class OfflineContextoOracle:
-    # (Esta classe permanece inalterada)
     def __init__(self, model: KeyedVectors, secret: str):
         if secret not in model:
             raise ValueError(f"A palavra secreta '{secret}' não está no vocabulário do modelo.")
@@ -77,7 +76,6 @@ class OfflineContextoOracle:
         return self.rank_map.get(guess, None)
 
 class HybridContextoSolver:
-    # (Esta classe permanece praticamente inalterada, mas agora se beneficia da validação mais forte)
     def __init__(
         self,
         model: KeyedVectors,
@@ -209,7 +207,7 @@ try:
     model = KeyedVectors.load_word2vec_format("cbow_s300.txt", binary=False)
     print("Modelo carregado com sucesso.")
 
-    secret = "felicidade" # Mude para testar
+    secret = "fronha" # Mude para testar
 
     oracle = OfflineContextoOracle(model, secret)
     solver = HybridContextoSolver(model, oracle_query=oracle.query_rank) 
