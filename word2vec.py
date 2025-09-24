@@ -7,7 +7,7 @@ from gensim.models import KeyedVectors
 import nltk
 from contexto_offline import ContextoOffline
 from contexto_online import ContextoOnline
-
+from simplemma import lemmatize
 
 class ContextoSolver:
     def __init__(
@@ -44,12 +44,12 @@ class ContextoSolver:
         self.reg = Ridge(alpha=0.5, random_state=random_state)
         self.X_obs = list()
         self.y_obs = list()
-        self._fitted = False
+        self._fitted = False 
         self.optimization_mode = False
 
     def _observe_and_learn(self, word: str, rank: int):
         self.history.append((word, rank))
-        self.guessed.add(self._apply_stemmer(word))
+        self.guessed.add(self._apply_lemmatizer(word))
         self.best_words.append((word, rank))
         self.best_words.sort(key=lambda x: x[1])
         
@@ -116,16 +116,16 @@ class ContextoSolver:
         
         return self.rng.choice([w for w in list(self.vocab) if self._is_new(w)])
 
-    def solve(self, max_attempts: int = 200, verbose: bool = True) -> List[Tuple[str, int]]:
+    def solve(self, max_attempts: int = 200, verbose: bool = True) -> list:
         for attempt in range(1, max_attempts + 1):
             current = self._choose_next()
             if current in self.guessed: continue
 
             rank = self.query_function(current)
             if rank is None:
-                self.guessed.add(self._apply_stemmer(current))
+                self.guessed.add(self._apply_lemmatizer(current))
                 continue
-
+            
             self._observe_and_learn(current, rank)
             
             if verbose:
@@ -162,8 +162,12 @@ class ContextoSolver:
         """Aplica a stemização na palavra."""
         return self.stemmer.stem(w)
     
+    def _apply_lemmatizer(self, w: str) -> str:
+        """Aplica a lematização na palavra."""
+        return lemmatize(w, lang="pt")
+    
     def _is_new(self, w: str) -> bool:
-        return self._apply_stemmer(w) not in self.guessed
+        return self._apply_lemmatizer(w) not in self.guessed
 
 if __name__ == "__main__":
     nltk.download('stopwords', quiet=True)
@@ -178,7 +182,7 @@ if __name__ == "__main__":
     # solver = ContextoSolver(model, query_function=contexto.query_rank) 
     # history = solver.solve(max_attempts=200, verbose=True)
     
-    contexto = ContextoOnline(headless=False).start()
+    contexto = ContextoOnline(headless=True).start()
     solver = ContextoSolver(model, query_function=contexto.query)
     history = solver.solve(max_attempts=200, verbose=True)
     contexto.close()

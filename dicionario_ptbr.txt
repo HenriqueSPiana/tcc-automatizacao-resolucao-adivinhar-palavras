@@ -148024,7 +148024,6 @@ gozem
 gozemo
 gozemos
 gozes
-gozo
 gôzo
 gozos
 gozosa
@@ -191475,10 +191474,8 @@ pelicas
 película
 películas
 pelo
-pêlo
 peloponeso
 pelos
-pêlos
 pelota
 pelotaço
 pelotaços
