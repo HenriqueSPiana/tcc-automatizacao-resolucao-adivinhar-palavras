@@ -1,6 +1,6 @@
 import random
 import numpy as np
-from typing import Callable, List, Tuple, Set
+from typing import Callable
 import nltk
 from sklearn.linear_model import Ridge
 from gensim.models import KeyedVectors
@@ -68,7 +68,7 @@ class ContextoSolver:
                 self.reg.fit(np.vstack(self.X_obs), np.array(self.y_obs))
                 self._fitted = True
 
-    def _get_candidates_from_history(self) -> Set[str]:
+    def _get_candidates_from_history(self) -> set:
         pool = set()
         if not self.best_words: return pool
         best_word, _ = self.best_words[0]
@@ -177,7 +177,7 @@ if __name__ == "__main__":
     model = KeyedVectors.load_word2vec_format("cbow_s300.txt", binary=False)
     print("Modelo carregado com sucesso.")
 
-    # secret = "lupa"
+    # secret = "salame"
     # contexto = ContextoOffline(model, secret)
     # solver = ContextoSolver(model, query_function=contexto.query_rank) 
     # history = solver.solve(max_attempts=200, verbose=True)

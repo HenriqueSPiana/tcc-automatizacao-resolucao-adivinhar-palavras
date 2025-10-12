@@ -1,0 +1,17 @@
+name: contexto-solver
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - numpy=1.26.4
+  - scipy=1.12.0
+  - pandas=2.1.4
+  - scikit-learn=1.3.2
+  - pip
+  - pip:
+      - gensim==4.3.3
+      - nltk
+      - simplemma
+      - playwright
+      - huggingface_hub
