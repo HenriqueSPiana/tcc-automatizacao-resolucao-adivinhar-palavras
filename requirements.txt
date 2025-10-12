@@ -3,3 +3,5 @@ webdriver-manager==4.0.1
 gensim==4.3.3
 nltk==3.9.1
 numpy==1.26.4 
+requests==2.32.4
+simplemma==1.1.2
