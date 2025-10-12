@@ -5,7 +5,7 @@ import nltk
 from sklearn.linear_model import Ridge
 from gensim.models import KeyedVectors
 from simplemma import lemmatize
-k # <--- ADICIONADO: para requisições HTTP
+import requests 
 import concurrent.futures
 
 import requests
