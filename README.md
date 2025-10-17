@@ -1,7 +1,7 @@
 # tcc-automatizacao-resolucao-adivinhar-palavras
 ## A.1. Objetivo Geral
 
-O objetivo geral do projeto é aplicar conceitos de engenharia e arquitetura de software no desenvolvimento de uma aplicação computacional que automatiza a resolução de jogos de adivinhação de palavras. O foco está na criação de um sistema modular, flexível e com bom desempenho, que aborda requisitos não funcionais essenciais enquanto explora o potencial da Inteligência Artificial e do Processamento de Linguagem Natural (PLN) para simular o raciocínio linguístico humano.
+O objetivo geral do projeto é automatizar a resolução de jogos de adivinhação de palavras. O foco está na criação de um sistema com bom desempenho que explora o potencial da Inteligência Artificial e do Processamento de Linguagem Natural (PLN) para simular o raciocínio linguístico humano.
 
 ---
 
@@ -36,7 +36,6 @@ O objetivo geral do projeto é aplicar conceitos de engenharia e arquitetura de 
 1.  **Manutenibilidade:** A capacidade de corrigir, adaptar e melhorar o software facilmente. A separação clara de responsabilidades entre a lógica do resolvedor (`ContextoSolver`) e os métodos de interação com o jogo é crucial.
 2.  **Flexibilidade/Adaptabilidade:** A facilidade de adaptar o sistema para diferentes contextos. O resolvedor deve ser capaz de operar com diferentes modelos de *embedding* e diferentes interfaces de jogo sem alterações em sua lógica central.
 3.  **Desempenho:** O sistema deve ser capaz de encontrar a palavra secreta em um tempo e número de tentativas razoáveis, otimizando tanto o algoritmo de escolha quanto a forma de comunicação com o jogo.
-4.  **Confiabilidade:** O sistema deve lidar com falhas de comunicação (ex: *timeouts* de rede) sem interromper sua execução.
 
 ### Etapa 3 – Escolha e Justificativa da Arquitetura
 
@@ -51,13 +50,5 @@ O objetivo geral do projeto é aplicar conceitos de engenharia e arquitetura de 
     * **Manutenibilidade:** A arquitetura é altamente manutenível. Para dar suporte a um novo jogo, basta criar uma nova classe de interface sem modificar o `ContextoSolver`.
     * **Flexibilidade:** O sistema atende diretamente a este requisito. O usuário pode "injetar" qualquer função de consulta e qualquer modelo de *embedding* compatível.
     * **Desempenho:** A separação de camadas permite escolher a implementação mais performática para cada tarefa (ex: `ContextoAPI` para velocidade, `ContextoOnline` para depuração).
-    * **Confiabilidade:** A lógica de tratamento de erros fica contida na Camada de Interface, impedindo que falhas de comunicação afetem a lógica principal.
 
 ### Etapa 4 – Estruturação e Desenvolvimento
-
-O produto desta etapa é a aplicação funcional, cujo código-fonte está organizado de forma coerente com a arquitetura escolhida nos seguintes arquivos:
-* `solver.py`
-* `contexto_api.py`
-* `contexto_online.py`
-* `contexto_offline.py`
-* `prepare_embedding.py`
