@@ -43,17 +43,22 @@ from gensim.models import KeyedVectors
 def run_analysis_case(
     test_name: str,
     solver_factory: Callable[[], ContextoSolver],
-    max_attempts: int
+    max_attempts: int,
+    logs_dir: str  # <--- NOVO PARÂMETRO
 ) -> dict:
     """
     Executa um único cenário do solver e retorna estatísticas detalhadas.
+    Gera um arquivo de log de tentativas na pasta 'logs_dir'.
     """
-
     
     print(f"[EXECUTANDO]... {test_name}")
     start_time = time.time()
     original_cwd = os.getcwd()
     report = {"nome": test_name}
+    
+    # Prepara o nome do arquivo de log (ex: "api_dia_1.log")
+    safe_filename = test_name.lower().replace(" ", "_").replace("(", "").replace(")", "").replace("/", "")
+    log_file_path = os.path.join(logs_dir, f"{safe_filename}.log")
     
     try:
         # Muda para o diretório RAIZ do projeto
@@ -62,6 +67,7 @@ def run_analysis_case(
         # Instancia o solver 
         solver = solver_factory()
         
+        # Executa com verbose=False para não poluir o console principal
         history = solver.solve(max_attempts=max_attempts, verbose=False)
         
         # Coleta os resultados
@@ -73,12 +79,54 @@ def run_analysis_case(
         else:
             report['melhor_palavra'] = "N/A"
 
+        # --- NOVO BLOCO: GERA O ARQUIVO DE LOG ---
+        try:
+            # Obtém o limite de otimização do solver
+            limit = solver.optimization_rank_limit 
+            best_rank_so_far = float('inf')
+            optimization_mode = False
+            
+            with open(log_file_path, 'w', encoding='utf-8') as log_f:
+                log_f.write(f"--- Log de Execução para: {test_name} ---\n")
+                log_f.write(f"Limite de Otimização: {limit}\n")
+                log_f.write(f"Total de Tentativas: {len(history)}\n")
+                log_f.write(f"Resultado: {'SUCESSO' if report['sucesso'] else 'FALHA'}\n")
+                log_f.write(f"Melhor Palavra: {report['melhor_palavra']} (Rank: {report['melhor_rank']})\n")
+                log_f.write("-" * 40 + "\n\n")
+                
+                # Recria o log detalhado a partir do histórico
+                for attempt_num, (word, rank) in enumerate(history, start=1):
+                    if rank < best_rank_so_far:
+                        best_rank_so_far = rank
+                        # Simula a ativação do modo de otimização
+                        if not optimization_mode and best_rank_so_far < limit:
+                            optimization_mode = True
+                            log_f.write(f"--- ATIVANDO MODO DE OTIMIZAÇÃO (MELHOR RANK: {best_rank_so_far}) ---\n\n")
+                    
+                    mode = "OPTIMIZE" if optimization_mode else "EXPLORE"
+                    # Simula a linha de log do verbose=True
+                    log_f.write(f"Tentativa {attempt_num:03d} [{mode}]: {word:<15} → rank {rank:<5} (Melhor: {best_rank_so_far})\n")
+                
+                log_f.write("\n" + "-" * 40 + "\n")
+                if report['sucesso']:
+                    log_f.write(f"Descoberta em {len(history)} tentativas: {report['melhor_palavra']}\n")
+                else:
+                    log_f.write(f"Não encontrou a palavra. Melhor tentativa: '{report['melhor_palavra']}' (rank {report['melhor_rank']})\n")
+
+        except Exception as log_e:
+            print(f"[ERRO DE LOG] Falha ao escrever log para {test_name}: {log_e}")
+        # --- FIM DO BLOCO DE LOG ---
+
     except Exception as e:
         report['sucesso'] = False
         report['erro'] = str(e)
         report['melhor_rank'] = float('inf')
         report['tentativas_totais'] = 0
         report['melhor_palavra'] = "ERRO"
+        # Tenta salvar o erro no log também
+        with open(log_file_path, 'w', encoding='utf-8') as log_f:
+            log_f.write(f"--- ERRO NA EXECUÇÃO DE: {test_name} ---\n")
+            log_f.write(str(e))
     
     finally:
         # Garante que o CWD seja restaurado
@@ -91,6 +139,8 @@ def run_analysis_case(
     status = "SUCESSO" if report['sucesso'] else "FALHA"
     print(f"[CONCLUÍDO] {test_name:<20} | {status:<7} | Rank: {report['melhor_rank']:<5} | Tentativas: {report['tentativas_totais']}")
     return report
+
+
 def generate_report(results: List[Dict[str, Any]], output_dir: str):
     """
     Processa a lista de resultados e gera o relatório estatístico
@@ -177,7 +227,6 @@ def generate_report(results: List[Dict[str, Any]], output_dir: str):
         print(f"\n[ERRO] Não foi possível gerar o gráfico em pizza: {e}")
         print("Verifique se a biblioteca 'matplotlib' está instalada: pip install matplotlib")
 
-
 def main():
     print("--- INICIANDO CAMPANHA DE ANÁLISE DO SOLVER ---")
     
@@ -185,7 +234,25 @@ def main():
     print("Baixando pacotes NLTK (stopwords, rslp)...")
     nltk.download('stopwords', quiet=True)
     nltk.download('rslp', quiet=True)
+
+
+
+
+# ---  Pré-carregamento NLTK ---
+    # Força o NLTK a carregar os recursos ANTES de iniciar as threads
+    # Isso evita uma "race condition" no LazyCorpusLoader do NLTK
+    try:
+        print("Pré-carregando NLTK stopwords e stemmer...")
+        _ = nltk.corpus.stopwords.words("portuguese")
+        _ = nltk.stem.RSLPStemmer()
+        print("Recursos NLTK pré-carregados com sucesso.")
+    except Exception as e:
+        print(f"Erro fatal ao pré-carregar recursos NLTK: {e}")
+        print("Verifique sua instalação do NLTK e os dados baixados.")
+        sys.exit(1)
+
     os.system(f"{sys.executable} -m playwright install") # Para ContextoOnline
+
 
     # 2. Carregar Modelo
     print("Carregando modelo word embedding (Gensim/HF)...")
@@ -202,8 +269,7 @@ def main():
     
     # --- Configuração da Campanha ---
     DIA_INICIAL = 1
-    DIA_FINAL = 20
-    # Alterado conforme sua solicitação
+    DIA_FINAL = 100  # AVISO: Isso pode levar horas/dias e pode ser bloqueado
     MAX_TENTATIVAS_POR_DIA = 100 
     # ---------------------------------
 
@@ -211,31 +277,25 @@ def main():
     for dia in range(DIA_INICIAL, DIA_FINAL + 1):
         test_cases.append({
             "nome": f"API (Dia {dia})",
-            
-            # O 'd=dia' é crucial. Ele "captura" o valor de 'dia'
-            # no momento da criação do lambda. Sem isso, todos os testes
-            # rodariam para o último dia (DIA_FINAL) por causa do escopo.
             "factory": lambda d=dia: ContextoSolver(model, ContextoAPI(dia=d).query),
-            
             "max_attempts": MAX_TENTATIVAS_POR_DIA
         })
         
     print(f"{len(test_cases)} cenários de teste (API Dias {DIA_INICIAL}-{DIA_FINAL}) foram criados.")
 
-    # Se você também quiser rodar testes Offline JUNTAMENTE com os 1000 dias:
-    # test_cases.append(
-    #    {"nome": "Offline (animal)", "factory": lambda: ContextoSolver(model, ContextoOffline(model, "animal").query_rank), "max_attempts": 100}
-    # )
-    # test_cases.append(
-    #    {"nome": "Offline (computador)", "factory": lambda: ContextoSolver(model, ContextoOffline(model, "computador").query_rank), "max_attempts": 100}
-    # )
+    # --- NOVO: Criar diretório de Logs ---
+    LOGS_DIR = os.path.join(ROOT_DIR, 'logs')
+    os.makedirs(LOGS_DIR, exist_ok=True)
+    print(f"Logs de cada dia serão salvos em: {LOGS_DIR}")
+    # ------------------------------------
 
-    # --- CORREÇÃO: Inicializa a lista de resultados ---
     all_results = [] 
 
     # 4. Executar Concorrentemente
-    # Alterado de 4 para 3 para reduzir a carga na rede
-    max_workers = 8
+
+
+
+    max_workers = 8  # Ajuste conforme a capacidade do seu sistema 
     print(f"\nIniciando {len(test_cases)} cenários concorrentes (max_workers={max_workers})...")
     
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -244,7 +304,8 @@ def main():
                 run_analysis_case, 
                 case["nome"], 
                 case["factory"], 
-                case["max_attempts"]
+                case["max_attempts"],
+                LOGS_DIR  # <-- NOVO: Passa o caminho dos logs
             ): case 
             for case in test_cases
         }
