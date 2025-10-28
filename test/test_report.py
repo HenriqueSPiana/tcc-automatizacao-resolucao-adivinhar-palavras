@@ -3,11 +3,10 @@ import os
 import time
 import nltk
 import numpy as np
-import matplotlib.pyplot as plt
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Callable, List, Dict, Any
-
-
+import csv
+from threading import Lock 
 
 
 
@@ -60,6 +59,9 @@ def run_analysis_case(
     safe_filename = test_name.lower().replace(" ", "_").replace("(", "").replace(")", "").replace("/", "")
     log_file_path = os.path.join(logs_dir, f"{safe_filename}.log")
     
+    # --- MUDANÇA (1/2): Inicializa solver como None ---
+    solver = None 
+    
     try:
         # Muda para o diretório RAIZ do projeto
         os.chdir(ROOT_DIR)
@@ -79,9 +81,9 @@ def run_analysis_case(
         else:
             report['melhor_palavra'] = "N/A"
 
-        # --- NOVO BLOCO: GERA O ARQUIVO DE LOG ---
         try:
-            # Obtém o limite de otimização do solver
+            
+
             limit = solver.optimization_rank_limit 
             best_rank_so_far = float('inf')
             optimization_mode = False
@@ -101,13 +103,11 @@ def run_analysis_case(
                         # Simula a ativação do modo de otimização
                         if not optimization_mode and best_rank_so_far < limit:
                             optimization_mode = True
-                            log_f.write(f"--- ATIVANDO MODO DE OTIMIZAÇÃO (MELHOR RANK: {best_rank_so_far}) ---\n\n")
                     
                     mode = "OPTIMIZE" if optimization_mode else "EXPLORE"
                     # Simula a linha de log do verbose=True
                     log_f.write(f"Tentativa {attempt_num:03d} [{mode}]: {word:<15} → rank {rank:<5} (Melhor: {best_rank_so_far})\n")
                 
-                log_f.write("\n" + "-" * 40 + "\n")
                 if report['sucesso']:
                     log_f.write(f"Descoberta em {len(history)} tentativas: {report['melhor_palavra']}\n")
                 else:
@@ -123,141 +123,118 @@ def run_analysis_case(
         report['melhor_rank'] = float('inf')
         report['tentativas_totais'] = 0
         report['melhor_palavra'] = "ERRO"
-        # Tenta salvar o erro no log também
-        with open(log_file_path, 'w', encoding='utf-8') as log_f:
-            log_f.write(f"--- ERRO NA EXECUÇÃO DE: {test_name} ---\n")
-            log_f.write(str(e))
     
     finally:
         # Garante que o CWD seja restaurado
         os.chdir(original_cwd)
+        
+        # --- MUDANÇA (2/2): Bloco 'finally' corrigido ---
         # Garante que o browser (se houver) seja fechado
-        if isinstance(solver_factory.__self__, ContextoOnline):
-             solver_factory.__self__.close()
+        # Verifica se o solver foi instanciado e se a query_function é um método
+        # de uma instância ContextoOnline.
+        try:
+            if solver and hasattr(solver.query_function, '__self__'):
+                instance = solver.query_function.__self__
+                if isinstance(instance, ContextoOnline):
+                    # print(f"[CLEANUP] Fechando browser do ContextoOnline for {test_name}...")
+                    instance.close()
+        except Exception as e:
+            print(f"[ERRO NO CLEANUP] Falha ao fechar o browser: {e}")
+        # --- FIM DA MUDANÇA ---
 
-    report['tempo_s'] = time.time() - start_time
-    status = "SUCESSO" if report['sucesso'] else "FALHA"
-    print(f"[CONCLUÍDO] {test_name:<20} | {status:<7} | Rank: {report['melhor_rank']:<5} | Tentativas: {report['tentativas_totais']}")
     return report
 
-
-def generate_report(results: List[Dict[str, Any]], output_dir: str):
+# --- FUNÇÃO MODIFICADA ---
+def generate_report(report_list: List[Dict[str, Any]], output_dir: str, filename: str = "analysis_report.txt") -> str:
     """
-    Processa a lista de resultados e gera o relatório estatístico
-    e o gráfico em pizza.
+    Gera um arquivo TXT de relatório resumido a partir de uma lista de dicionários.
+
+    Args:
+        report_list: Uma lista de dicionários, onde cada dicionário é um 'report'
+                     vindo da função 'run_analysis_case'.
+        output_dir: O diretório onde o arquivo TXT será salvo.
+        filename: O nome do arquivo TXT a ser gerado.
+
+    Returns:
+        O caminho completo para o arquivo TXT gerado.
     """
-    print("\n\n" + "="*50)
-    print("      GERANDO RELATÓRIO DE DESEMPENHO DO SOLVER")
-    print("="*50)
-
-    total_runs = len(results)
-    if total_runs == 0:
-        print("Nenhuma execução foi concluída. Saindo.")
-        return
-
-    # 1. Coleta de Dados
-    successes = [r for r in results if r.get('sucesso') == True]
-    failures = [r for r in results if r.get('sucesso') == False]
     
-    num_success = len(successes)
-    num_failure = len(failures)
+    if not report_list:
+        print("[AVISO] A lista de relatórios está vazia. Nenhum TXT será gerado.")
+        return ""
 
-    # 2. Cálculos Estatísticos
-    perc_success = (num_success / total_runs) * 100
-    perc_failure = (num_failure / total_runs) * 100
+    # Garante que o diretório de saída exista
+    os.makedirs(output_dir, exist_ok=True)
     
-    # Média de tentativas para acertar
-    attempts_success_list = [r['tentativas_totais'] for r in successes]
-    avg_attempts_success = np.mean(attempts_success_list) if attempts_success_list else 0
+    # Define o caminho completo do arquivo
+    filepath = os.path.join(output_dir, filename)
     
-    # Média do melhor ranking ao errar
-    # Usar .get() para ser seguro contra KeyErrors. Se a chave não existir, retorna 'inf'
-    ranks_list = [r.get('melhor_rank', float('inf')) for r in failures]
-    best_rank_failure_list = [rank for rank in ranks_list if rank != float('inf')]
-    avg_rank_failure = np.mean(best_rank_failure_list) if best_rank_failure_list else 0
-
-    # 3. Relatório no Console
-    print("\n--- ESTATÍSTICAS GERAIS ---")
-    print(f"Execuções Totais: {total_runs}")
-    print(f"Acertos: {num_success} ({perc_success:.1f}%)")
-    print(f"Erros:   {num_failure} ({perc_failure:.1f}%)")
+    # Define o formato (largura das colunas)
+    header_fmt = "{:<25} | {:<8} | {:<12} | {:<12} | {:<18} | {}\n"
+    line_fmt   = "{:<25} | {:<8} | {:<12} | {:<12} | {:<18} | {}\n"
     
-    print("\n--- MÉDIAS DE DESEMPENHO ---")
-    print(f"Média de Tentativas (em Acertos): {avg_attempts_success:.2f}")
-    print(f"Média do Melhor Rank (em Erros):  {avg_rank_failure:.2f}")
+    print(f"[RELATÓRIO] Gerando TXT em: {filepath}")
 
-    if failures:
-        print("\n--- DETALHAMENTO DE FALHAS ---")
-        for f in failures:
-            if 'erro' in f:
-                print(f"  - {f['nome']:<25} | ERRO: {f['erro']}")
-            else:
-                print(f"  - {f['nome']:<25} | Melhor Rank: {f['melhor_rank']:<5} (Palavra: {f['melhor_palavra']})")
-
-    # 4. Geração do Gráfico em Pizza
     try:
-        labels = ['Acertos', 'Erros']
-        sizes = [num_success, num_failure]
-        colors = ['#4CAF50', '#F44336'] # Verde, Vermelho
-        explode = (0.1 if num_success > 0 else 0, 0) # Destaca a fatia de acertos
-
-        fig, ax = plt.subplots(figsize=(8, 6))
-        ax.pie(
-            sizes,
-            explode=explode,
-            labels=labels,
-            colors=colors,
-            autopct=lambda p: '{:.1f}% ({:.0f})'.format(p, p * total_runs / 100),
-            shadow=True,
-            startangle=90,
-            textprops={'fontsize': 12}
-        )
-        ax.axis('equal')  # Assegura que a pizza seja um círculo
+        with open(filepath, 'w', encoding='utf-8') as txtfile:
+            # Escreve o cabeçalho
+            txtfile.write(header_fmt.format(
+                "NOME DO TESTE", 
+                "SUCESSO", 
+                "TENTATIVAS", 
+                "MELHOR_RANK", 
+                "MELHOR_PALAVRA", 
+                "ERRO"
+            ))
+            txtfile.write("-" * 110 + "\n") # Linha separadora
+            
+            # Escreve os dados
+            for report_data in report_list:
+                txtfile.write(line_fmt.format(
+                    str(report_data.get("nome", "N/A")),
+                    str(report_data.get("sucesso", "N/A")),
+                    str(report_data.get("tentativas_totais", "N/A")),
+                    str(report_data.get("melhor_rank", "N/A")),
+                    str(report_data.get("melhor_palavra", "N/A")),
+                    str(report_data.get("erro", "N/A"))
+                ))
+                
+        print(f"[RELATÓRIO] Geração do TXT concluída com {len(report_list)} registros.")
+        return filepath
         
-        plt.title(f'Relatório de Acertos vs Erros ({total_runs} Execuções)', fontsize=16)
-        
-        report_filename = os.path.join(output_dir, 'relatorio_solver_pizza.png')
-        plt.savefig(report_filename)
-        
-        print("\n" + "-"*50)
-        print(f"✅ Gráfico em pizza salvo em: {report_filename}")
-        print("="*50)
-
+    except IOError as e:
+        print(f"[ERRO TXT] Falha ao escrever arquivo TXT em {filepath}: {e}")
+        return ""
     except Exception as e:
-        print(f"\n[ERRO] Não foi possível gerar o gráfico em pizza: {e}")
-        print("Verifique se a biblioteca 'matplotlib' está instalada: pip install matplotlib")
+        print(f"[ERRO INESPERADO] Ocorreu um erro ao gerar o TXT: {e}")
+        return ""
+    
 
 def main():
-    print("--- INICIANDO CAMPANHA DE ANÁLISE DO SOLVER ---")
     
     # 1. Dependências
     print("Baixando pacotes NLTK (stopwords, rslp)...")
     nltk.download('stopwords', quiet=True)
     nltk.download('rslp', quiet=True)
 
-
-
-
-# ---  Pré-carregamento NLTK ---
-    # Força o NLTK a carregar os recursos ANTES de iniciar as threads
-    # Isso evita uma "race condition" no LazyCorpusLoader do NLTK
     try:
         print("Pré-carregando NLTK stopwords e stemmer...")
-        _ = nltk.corpus.stopwords.words("portuguese")
+        _ = nltk.corpus.stopwords.words("portuguuese")
         _ = nltk.stem.RSLPStemmer()
         print("Recursos NLTK pré-carregados com sucesso.")
     except Exception as e:
         print(f"Erro fatal ao pré-carregar recursos NLTK: {e}")
-        print("Verifique sua instalação do NLTK e os dados baixados.")
         sys.exit(1)
 
-    os.system(f"{sys.executable} -m playwright install") # Para ContextoOnline
-
+    # Instala o playwright (necessário para ContextoOnline)
+    # print("Instalando dependências do Playwright...")
+    # os.system(f"{sys.executable} -m playwright install") 
 
     # 2. Carregar Modelo
     print("Carregando modelo word embedding (Gensim/HF)...")
     start_model_load = time.time()
     try:
+        # Certifique-se que 'load_huggingface_to_gensim' está importado
         model = load_huggingface_to_gensim("nilc-nlp/glove-300d")
         print(f"Modelo carregado em {time.time() - start_model_load:.2f}s.")
     except Exception as e:
@@ -265,14 +242,12 @@ def main():
         sys.exit(1)
 
     # 3. Definir Cenários de Análise
-    print("Gerando cenários de teste para os dias 1 a 1000...")
-    
-    # --- Configuração da Campanha ---
-    DIA_INICIAL = 1
-    DIA_FINAL = 100  # AVISO: Isso pode levar horas/dias e pode ser bloqueado
-    MAX_TENTATIVAS_POR_DIA = 100 
-    # ---------------------------------
+    output_directory = "reports"
 
+    DIA_INICIAL = 1
+    DIA_FINAL = 6  
+    MAX_TENTATIVAS_POR_DIA = 100 
+    
     test_cases = []
     for dia in range(DIA_INICIAL, DIA_FINAL + 1):
         test_cases.append({
@@ -281,22 +256,27 @@ def main():
             "max_attempts": MAX_TENTATIVAS_POR_DIA
         })
         
-    print(f"{len(test_cases)} cenários de teste (API Dias {DIA_INICIAL}-{DIA_FINAL}) foram criados.")
+    # Exemplo de como adicionar um teste ContextoOnline (requer Playwright)
+    # def online_factory():
+    #     contexto = ContextoOnline(headless=True).start()
+    #     return ContextoSolver(model, contexto.query)
+    # test_cases.append({
+    #     "nome": "Online (Hoje)",
+    #     "factory": online_factory,
+    #     "max_attempts": MAX_TENTATIVAS_POR_DIA
+    # })
+        
 
-    # --- NOVO: Criar diretório de Logs ---
     LOGS_DIR = os.path.join(ROOT_DIR, 'logs')
     os.makedirs(LOGS_DIR, exist_ok=True)
-    print(f"Logs de cada dia serão salvos em: {LOGS_DIR}")
-    # ------------------------------------
 
-    all_results = [] 
+    
 
-    # 4. Executar Concorrentemente
-
-
-
-    max_workers = 8  # Ajuste conforme a capacidade do seu sistema 
-    print(f"\nIniciando {len(test_cases)} cenários concorrentes (max_workers={max_workers})...")
+    print(f"\nIniciando execução de {len(test_cases)} casos de teste...")
+    start_all_time = time.time()
+    
+    results_list = [] # <-- Lista para guardar resultados REAIS
+    max_workers = 4 
     
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {
@@ -305,22 +285,58 @@ def main():
                 case["nome"], 
                 case["factory"], 
                 case["max_attempts"],
-                LOGS_DIR  # <-- NOVO: Passa o caminho dos logs
+                LOGS_DIR           
             ): case 
             for case in test_cases
         }
-        
-        for future in as_completed(futures):
-            try:
-                result = future.result()
-                all_results.append(result)
-            except Exception as e:
-                case_name = futures[future]["nome"]
-                all_results.append({"nome": case_name, "sucesso": False, "erro": f"Erro no executor: {e}"})
 
-    # 5. Gerar Relatório
-    # O relatório será salvo na pasta 'test/'
-    generate_report(all_results, TEST_DIR)
+        print(f"Testes submetidos (usando até {max_workers} workers). Aguardando conclusão...")
+        
+        # Itera sobre as futures à medida que elas terminam
+        for future in as_completed(futures):
+            case = futures[future]
+            try:
+                report = future.result() # Pega o dicionário de resultado
+                results_list.append(report)
+                
+                # Fornece feedback visual
+                status = "SUCESSO" if report.get('sucesso') else "FALHA"
+                if 'erro' in report:
+                     status = f"ERRO ({report['erro']})"
+                print(f"[CONCLUÍDO] {case['nome']} (Status: {status})")
+                
+            except Exception as e:
+                # Captura erros inesperados na própria thread
+                print(f"[ERRO FATAL NO WORKER] {case['nome']} falhou: {e}")
+                results_list.append({
+                    "nome": case['nome'],
+                    "sucesso": False,
+                    "erro": str(e),
+                    "melhor_rank": float('inf'),
+                    "tentativas_totais": 0,
+                    "melhor_palavra": "ERRO FATAL"
+                })
+    
+    print(f"\nTodos os testes concluídos em {time.time() - start_all_time:.2f}s.")
+
+    
+    if not results_list:
+        print("Nenhum resultado foi coletado. O relatório TXT não será gerado.")
+        return
+
+    # --- CHAMADA MODIFICADA ---
+    generated_file_path = generate_report(
+        report_list=results_list, 
+        output_dir=output_directory,
+        filename="meu_relatorio_de_analise.txt" # <-- Mudado de .csv para .txt
+    )
+    
+    if generated_file_path:
+        print(f"\nArquivo de relatório real gerado: {generated_file_path}")
+    else:
+        print("\nFalha ao gerar o arquivo de relatório TXT.") # <-- Mensagem atualizada
+
+
 
 
 if __name__ == "__main__":
