@@ -5,6 +5,7 @@ import nltk
 from sklearn.linear_model import Ridge
 from gensim.models import KeyedVectors
 import nltk
+from functools import lru_cache
 from contexto_offline import ContextoOffline
 from contexto_online import ContextoOnline
 from contexto_api import ContextoAPI
@@ -164,9 +165,10 @@ class ContextoSolver:
         """Aplica a stemização na palavra."""
         return self.stemmer.stem(w)
     
+    @lru_cache(maxsize=100_000)
     def _apply_lemmatizer(self, w: str) -> str:
         """Aplica a lematização na palavra."""
-        return lemmatize(w, lang="pt")
+        return lemmatize(w.lower(), lang="pt")
     
     def _is_new(self, w: str) -> bool:
         return self._apply_lemmatizer(w) not in self.guessed
@@ -187,11 +189,11 @@ if __name__ == "__main__":
     # solver = ContextoSolver(model, query_function=contexto.query_rank) 
     # history = solver.solve(max_attempts=200, verbose=True)
     
-    # contexto = ContextoOnline(headless=True).start()
-    # solver = ContextoSolver(model, query_function=contexto.query)
-    # history = solver.solve(max_attempts=200, verbose=True)
-    # contexto.close()
-    
-    contexto = ContextoAPI(dia=1000)
+    contexto = ContextoOnline(headless=False).start()
     solver = ContextoSolver(model, query_function=contexto.query)
-    history = solver.solve(max_attempts=100, verbose=True)
+    history = solver.solve(max_attempts=200, verbose=True)
+    contexto.close()
+    
+    # contexto = ContextoAPI(dia=1364)
+    # solver = ContextoSolver(model, query_function=contexto.query)
+    # history = solver.solve(max_attempts=100, verbose=True)

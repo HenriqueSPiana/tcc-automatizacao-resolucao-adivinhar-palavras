@@ -31114,7 +31114,6 @@ assiduidade
 assiduidades
 assíduo
 assíduos
-assim
 assimetria
 assimetrias
 assimétrica
@@ -56864,7 +56863,6 @@ coirmão
 coirmãos
 coirmãs
 coisa
-coisas
 coisinha
 coisinhas
 coitada
@@ -143680,7 +143678,6 @@ frustres
 frustro
 frustrou
 fruta
-frutas
 fruteira
 fruteiras
 fruteiro
@@ -181532,8 +181529,6 @@ nenê
 neném
 nenéns
 nenês
-nenhum
-nenhuma
 nenhuns
 nenhures
 neófita
@@ -181572,14 +181567,6 @@ nêspera
 nêsperas
 nespereira
 nespereiras
-nessa
-nessas
-nesse
-nesses
-nesta
-nestas
-neste
-nestes
 nestor
 neta
 netas
@@ -187169,11 +187156,7 @@ outorguem
 outorguemo
 outorguemos
 outorgues
-outra
-outras
-outro
 outrora
-outros
 outrossim
 outubro
 ouve
@@ -196993,7 +196976,6 @@ poetizemos
 poetizes
 poetizo
 poetizou
-pois
 polaca
 polacas
 polaco
@@ -207132,7 +207114,6 @@ qualitativa
 qualitativas
 qualitativo
 qualitativos
-qualquer
 quando
 quanta
 quantas

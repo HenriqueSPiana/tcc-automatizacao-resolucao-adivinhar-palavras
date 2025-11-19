@@ -29,25 +29,17 @@ class ContextoOnline:
         Envia 'guess' e retorna o rank (int). Se não conseguir ler, retorna None.
         Corrigido para ler a PRIMEIRA linha (a mais recente) e extrair números com milhares/sufixos.
         """
-        # Quantas linhas existiam antes do chute?
-        try:
-            prev_count = len(self._page.query_selector_all("div.row"))
-        except Exception:
-            prev_count = 0
-
         # Envia chute
         print(f"Enviando chute: {guess}")
         self._page.fill("input[type='text'], input", guess)
         self._page.keyboard.press("Enter")
 
-        # Espera aparecer uma NOVA linha
         try:
-            self._page.wait_for_function(
-                "(prev) => document.querySelectorAll('div.row').length > prev",
-                arg=prev_count,
-                timeout=15000
-            )
-        except TimeoutError:
+            self._page.wait_for_selector("div.loading-text", state="hidden", timeout=5000)
+        except Exception:
+            pass
+        
+        if self._page.query_selector("div.message-text") is not None:
             return None
 
         # Lê a PRIMEIRA linha (mais recente)
