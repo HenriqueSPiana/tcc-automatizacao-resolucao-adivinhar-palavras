@@ -124,7 +124,7 @@ class ContextoSolver:
             current = self._choose_next()
             if current in self.guessed: continue
 
-            rank = self.query_function(current)
+            rank = self.query_function(self._apply_lemmatizer(current))
             if rank is None:
                 self.guessed.add(self._apply_lemmatizer(current))
                 continue

@@ -24038,7 +24038,6 @@ aportuguesadas
 aportuguesado
 aportuguesados
 aportuguesamento
-após
 aposenta
 aposentá
 aposentada
@@ -70996,7 +70995,6 @@ cuidemos
 cuides
 cuido
 cuidou
-cuja
 cujas
 cujo
 cujos
@@ -92407,7 +92405,6 @@ desrespeitosa
 desrespeitosas
 desrespeitoso
 desrespeitosos
-dessa
 dessaliniza
 dessalinizá
 dessalinização
@@ -92528,7 +92525,6 @@ désseis
 dessem
 déssemos
 desses
-desta
 destaca
 destacá
 destacada
@@ -115632,7 +115628,6 @@ entalho
 entalhou
 entalo
 entalou
-entanto
 então
 entardeça
 entardeçais
@@ -176112,8 +176107,6 @@ mesclou
 meses
 mesinha
 mesinhas
-mesma
-mesmas
 mesmice
 mesmices
 mesmo
@@ -197819,7 +197812,6 @@ pordes
 porei
 poreis
 porem
-porém
 poremos
 poréns
 pores
@@ -197983,8 +197975,6 @@ portal
 portam
 portamo
 portamos
-portando
-portanto
 portão
 portar
 portara
@@ -235652,7 +235642,6 @@ siderúrgica
 siderúrgicas
 siderúrgico
 siderúrgicos
-sido
 sifão
 sifilítica
 sifilíticas
@@ -244625,8 +244614,6 @@ tailândia
 Tailândia
 taipa
 taipas
-tais
-tal
 tala
 talão
 talas
@@ -258232,8 +258219,6 @@ vexemos
 vexes
 vexo
 vexou
-vez
-vezes
 vi
 via
 viã
